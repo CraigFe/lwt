@@ -1,7 +1,7 @@
 (* This file is part of Lwt, released under the MIT license. See LICENSE.md for
    details, or visit https://github.com/ocsigen/lwt/blob/master/LICENSE.md. *)
 
-
+type ('a, 'b) stdlib_result = ('a, 'b) result
 
 (** Asynchronous programming with promises.
 
@@ -1457,11 +1457,11 @@ val return_false : bool t
 
 (** {3 Result type} *)
 
-type +'a result = ('a, exn) Result.result
+type nonrec +'a result = ('a, exn) result
 (** Representation of the content of a resolved promise of type
     ['a ]{!Lwt.t}.
 
-    This type is effectively
+    This type is
 
 {[
 type +'a Lwt.result =
@@ -1882,12 +1882,12 @@ val return_some : 'a -> ('a option) t
     takes an argument, so it cannot be evaluated at initialization time, at
     which time the argument is not yet available. *)
 
-val return_ok : 'a -> (('a, _) Result.result) t
+val return_ok : 'a -> (('a, _) stdlib_result) t
 (** Like {!Lwt.return_some}, this function performs no optimization.
 
     @since Lwt 2.6.0 *)
 
-val return_error : 'e -> ((_, 'e) Result.result) t
+val return_error : 'e -> ((_, 'e) stdlib_result) t
 (** Like {!Lwt.return_some}, this function performs no optimization.
 
     @since Lwt 2.6.0 *)

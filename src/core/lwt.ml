@@ -2,6 +2,7 @@
    details, or visit https://github.com/ocsigen/lwt/blob/master/LICENSE.md. *)
 
 
+type ('a, 'b) stdlib_result = ('a, 'b) result
 
 (* Reading guide
 
@@ -587,7 +588,7 @@ struct
      later in the module. This is to avoid potential confusion with
      [Pervasives.result]/[Result.result], as the public name would not be
      prefixed with [Lwt.] inside this file. *)
-  type +'a lwt_result = ('a, exn) Result.result
+  type +'a lwt_result = ('a, exn) result
 
   (* This could probably save an allocation by using [Obj.magic]. *)
   let state_of_result = function
@@ -1496,8 +1497,8 @@ sig
   val return_false : bool t
   val return_none : _ option t
   val return_some : 'a -> 'a option t
-  val return_ok : 'a -> ('a, _) Result.result t
-  val return_error : 'e -> (_, 'e) Result.result t
+  val return_ok : 'a -> ('a, _) result t
+  val return_error : 'e -> (_, 'e) result t
   val return_nil : _ list t
 
   val fail_with : string -> _ t

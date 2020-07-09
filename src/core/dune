@@ -1,23 +1,36 @@
 (* -*- tuareg -*- *)
 
+type conditional_includes = {
+  result_compat : bool;
+  seq_compat : bool;
+  future_syntax : bool;
+}
+
+let determine_includes maj min _patch =
+  {
+    result_compat = maj < 4 || (maj = 4 && min < 3);
+    seq_compat    = maj < 4 || (maj = 4 && min < 7);
+    future_syntax = maj < 4 || (maj = 4 && min < 8);
+  }
+
+let { result_compat; seq_compat; future_syntax } =
+  Scanf.sscanf Sys.ocaml_version "%d.%2d.%s" determine_includes
+
 let preprocess =
-  let older =
-    Scanf.sscanf
-      Sys.ocaml_version
-      "%d.%2d.%s"
-      (fun maj min _ -> maj < 4 || (maj = 4 && min < 8))
-  in
   let bisect =
     match Sys.getenv "BISECT_ENABLE" with
     | "yes" -> "(preprocess (pps bisect_ppx))"
     | _ -> ""
     | exception _ -> ""
   in
-  let future_syntax = "(preprocess (future_syntax))" in
-  if older then
-    future_syntax
+  if future_syntax then
+    "(preprocess (future_syntax))"
   else
     bisect
+
+let result = if result_compat then " result" else ""
+let open_result = if result_compat then " -open result" else ""
+let seq = if seq_compat then " seq" else ""
 
 let () = Jbuild_plugin.V1.send @@ {|
 
@@ -26,8 +39,8 @@ let () = Jbuild_plugin.V1.send @@ {|
  (synopsis "Monadic promises and concurrent I/O")
  (wrapped false)
  |} ^ preprocess ^ {|
- (libraries bytes result seq)
- (flags (:standard -w +A-29)))
+ (libraries bytes|} ^ result ^ seq ^ {|)
+ (flags (:standard -w +A-29|} ^ open_result ^ {|)))
 
 (documentation
  (package lwt))
